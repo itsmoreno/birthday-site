@@ -7,28 +7,34 @@
 <style>
   :root {
     /* night defaults */
-    --sky-top: #0b1430;
-    --sky-bottom: #101c3f;
-    --tagline-color: #9eefff;
+    --sky-top: #060f29;
+    --sky-bottom: #13244d;
+    --tagline-color: #b5e9ff;
     --hint-color: #2a1a08;
-    --grass: #63b63f;
-    --grass-top: #86d666;
-    --grass-dark: #3f7f29;
-    --dirt: #6f4a2f;
-    --dirt-top: #8c6240;
-    --dirt-dark: #4a2f1e;
-    --stone: #6f7784;
-    --stone-top: #8f98a7;
-    --stone-dark: #4a515d;
-    --moon: #f0f4c4;
-    --moon-dark: #c8cca0;
+    --grass: #4e9f3c;
+    --grass-top: #88cf5f;
+    --grass-dark: #2f6b29;
+    --dirt: #6d4a30;
+    --dirt-top: #8a5f3d;
+    --dirt-dark: #3f2618;
+    --stone: #6a7282;
+    --stone-top: #95a0b2;
+    --stone-dark: #3a4150;
+    --moon: #eaf1ce;
+    --moon-dark: #c3cb9c;
     --pixel-gold: #efc453;
+    --panel-bg: rgba(20, 30, 52, 0.62);
+    --panel-stroke: rgba(180, 214, 255, 0.45);
+    --panel-glow: rgba(70, 134, 255, 0.22);
   }
 
   body.day {
-    --sky-top: #74bff0;
-    --sky-bottom: #b8e0ff;
-    --tagline-color: #14365b;
+    --sky-top: #74c6ff;
+    --sky-bottom: #d3efff;
+    --tagline-color: #21486b;
+    --panel-bg: rgba(235, 247, 255, 0.62);
+    --panel-stroke: rgba(76, 120, 160, 0.4);
+    --panel-glow: rgba(132, 194, 255, 0.26);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,6 +42,7 @@
   html, body {
     width: 100%;
     min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
     background: var(--sky-top);
     color: #fff;
@@ -54,10 +61,28 @@
     position: fixed;
     inset: 0;
     z-index: 0;
-    background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-bottom) 100%);
+    background:
+      radial-gradient(1200px 600px at 72% -20%, rgba(130, 180, 255, 0.22), transparent 62%),
+      linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-bottom) 100%);
+  }
+  .sky::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 36%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 8px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+  .sky::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 120%, rgba(0, 0, 0, 0.45), transparent 52%);
+    pointer-events: none;
   }
 
-  /* CELESTIAL BODIES */
   .celestial {
     position: absolute;
     top: 9%;
@@ -69,7 +94,10 @@
   .moon {
     background: var(--moon);
     opacity: 0.92;
-    box-shadow: 0 0 0 4px rgba(240, 244, 196, 0.18);
+    border: 2px solid rgba(191, 198, 158, 0.9);
+    box-shadow:
+      0 0 0 4px rgba(240, 244, 196, 0.18),
+      0 0 32px 8px rgba(225, 234, 178, 0.34);
   }
   .moon::before {
     content: '';
@@ -89,10 +117,12 @@
 
   .sun {
     display: none;
-    background: #ffe04a;
+    background: linear-gradient(135deg, #fff18f 0%, #ffd84f 52%, #ffbb24 100%);
+    border: 2px solid rgba(255, 170, 40, 0.9);
     box-shadow:
       0 0 0 4px rgba(255, 224, 74, 0.25),
-      0 0 36px 10px rgba(255, 224, 74, 0.45);
+      0 0 36px 10px rgba(255, 224, 74, 0.45),
+      0 0 80px 18px rgba(255, 188, 48, 0.32);
   }
   .sun::before {
     content: '';
@@ -124,6 +154,7 @@
   .star {
     position: absolute;
     background: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.45);
   }
 
   /* TERRAIN */
@@ -137,6 +168,22 @@
     z-index: 2;
     overflow: hidden;
     pointer-events: none;
+    filter: drop-shadow(0 -18px 22px rgba(0, 0, 0, 0.32));
+  }
+  .terrain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(7, 12, 22, 0.58), rgba(7, 12, 22, 0));
+    pointer-events: none;
+  }
+  .terrain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 5px);
+    pointer-events: none;
+    opacity: 0.6;
   }
   .terrain-column {
     position: absolute;
@@ -149,7 +196,8 @@
     left: 0;
     width: 32px;
     height: 32px;
-    border: 2px solid rgba(0, 0, 0, 0.24);
+    border: 1px solid rgba(12, 18, 28, 0.55);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
   }
   .block.grass { background: var(--grass); box-shadow: inset 0 4px 0 var(--grass-top), inset 0 -4px 0 var(--grass-dark); }
   .block.dirt  { background: var(--dirt);  box-shadow: inset 0 4px 0 var(--dirt-top),  inset 0 -4px 0 var(--dirt-dark);  }
@@ -166,6 +214,7 @@
     z-index: 3;
     pointer-events: none;
     overflow: visible;
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
   }
 
   /* TORCH */
@@ -300,12 +349,15 @@
     position: relative;
     z-index: 5;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: clamp(1rem, 4vw, 3rem);
     text-align: center;
+    backdrop-filter: blur(2px);
+    isolation: isolate;
     gap: clamp(0.8rem, 2.4vw, 1.6rem);
   }
 
@@ -314,9 +366,12 @@
     position: relative;
     width: 106px;
     height: 106px;
-    background: #65bf45;
-    border: 4px solid #2f6a22;
-    box-shadow: 0 6px 0 #1f3e18;
+    background:
+      linear-gradient(135deg, #81db58 0%, #59b93d 60%, #35842a 100%);
+    border: 4px solid #285d20;
+    box-shadow:
+      0 7px 0 #1f3e18,
+      0 0 26px rgba(101, 191, 69, 0.35);
     flex-shrink: 0;
   }
   .hero .eye, .hero .nose, .hero .mouth { position: absolute; background: #182a14; }
@@ -334,7 +389,9 @@
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-size: clamp(0.62rem, 1.9vw, 0.86rem);
-    text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55);
+    text-shadow:
+      3px 3px 0 rgba(0, 0, 0, 0.55),
+      0 0 14px rgba(120, 210, 255, 0.22);
   }
   body.day .tagline { text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.5); }
 
@@ -345,19 +402,31 @@
     justify-content: center;
     align-items: stretch;
     gap: clamp(0.35rem, 1.6vw, 1rem);
-    margin: clamp(0.4rem, 1.2vw, 0.8rem) 0;
+    margin: clamp(0.5rem, 1.2vw, 0.9rem) 0;
+    width: min(92vw, 660px);
   }
   .unit {
     position: relative;
     min-width: clamp(78px, 14vw, 144px);
     padding: clamp(0.7rem, 2vw, 1.2rem) clamp(0.7rem, 2.3vw, 1.2rem);
-    background: #6c7481;
-    border: 4px solid #3f4550;
+    background:
+      linear-gradient(160deg, rgba(138, 151, 170, 0.95) 0%, rgba(102, 114, 132, 0.94) 46%, rgba(68, 77, 92, 0.98) 100%);
+    border: 2px solid rgba(36, 44, 56, 0.95);
     box-shadow:
-      inset 0 4px 0 #8f98a7,
-      inset 0 -4px 0 #343b45,
-      0 6px 0 #222831;
+      inset 0 4px 0 rgba(196, 208, 228, 0.45),
+      inset 0 -4px 0 rgba(41, 48, 62, 0.8),
+      0 8px 18px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(214, 227, 248, 0.13);
     overflow: hidden;
+    border-radius: 8px;
+  }
+  .unit::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 34%, rgba(0, 0, 0, 0.12));
+    opacity: 0;
+    pointer-events: none;
   }
   .unit::before {
     content: '';
@@ -383,10 +452,14 @@
     font-size: clamp(2.2rem, 6vw, 5.4rem);
     font-weight: 700;
     line-height: 1;
-    color: #f7fbff;
-    text-shadow: 3px 3px 0 #1c2635;
+    transform-origin: 50% 60%;
+    color: #f5fbff;
+    text-shadow:
+      3px 3px 0 #1c2635,
+      0 0 14px rgba(230, 245, 255, 0.4);
     font-variant-numeric: tabular-nums;
   }
+
   .unit-lbl {
     display: block;
     margin-top: 0.6rem;
@@ -396,41 +469,42 @@
     color: #dff5ff;
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.65);
   }
-  .sep {
-    align-self: center;
-    color: var(--pixel-gold);
-    font-size: clamp(1.8rem, 4.5vw, 3.9rem);
-    line-height: 1;
-    text-shadow: 2px 2px 0 #372d10;
-  }
 
-  /* SIGNPOST */
-  .signpost {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
+  .unit.is-updating {
+    animation: timer-card-pulse 380ms steps(4, end);
   }
-  .sign-board {
-    background: #b08043;
-    border: 3px solid #5b3a1a;
-    padding: 0.55rem 1.4rem 0.5rem;
-    color: #2a1a08;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    font-size: clamp(0.6rem, 1.5vw, 0.84rem);
-    text-shadow: 1px 1px 0 rgba(255, 240, 200, 0.45);
-    box-shadow:
-      inset 0 4px 0 #c89760,
-      inset 0 -4px 0 #875e2a,
-      0 4px 0 #4a2f10;
-    position: relative;
+  .unit.is-updating::after {
+    animation: timer-flash 380ms ease-out;
   }
-  .sign-stake {
-    width: 8px;
-    height: 14px;
-    background: #5b3a1a;
-    box-shadow: inset -2px 0 0 #2a1a08, inset 2px 0 0 #875e2a;
+  .unit.is-updating .unit-num {
+    animation: timer-digit-pop 380ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  }
+  @keyframes timer-digit-pop {
+    0% {
+      transform: translateY(14%) scale(0.82);
+      opacity: 0.2;
+      filter: blur(1px);
+    }
+    55% {
+      transform: translateY(-8%) scale(1.08);
+      opacity: 1;
+      filter: blur(0);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+  @keyframes timer-card-pulse {
+    0% { transform: translateY(2px) scale(0.985); }
+    60% { transform: translateY(-2px) scale(1.015); }
+    100% { transform: translateY(0) scale(1); }
+  }
+  @keyframes timer-flash {
+    0% { opacity: 0; }
+    35% { opacity: 1; }
+    100% { opacity: 0; }
   }
 
   /* BIRTHDAY STATE */
@@ -442,7 +516,7 @@
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    text-shadow: 3px 3px 0 #49390d;
+    text-shadow: 3px 3px 0 #49390d, 0 0 24px rgba(239, 196, 83, 0.36);
     line-height: 1.05;
   }
   .bday-sub {
@@ -455,18 +529,239 @@
   body.day .bday-sub { color: #1f5a2c; text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.5); }
 
   /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .stage {
+      justify-content: flex-start;
+      padding-top: max(1rem, env(safe-area-inset-top));
+      padding-bottom: max(0.8rem, env(safe-area-inset-bottom));
+      gap: 0.75rem;
+    }
+    .terrain, .decorations {
+      height: 30vh;
+      min-height: 180px;
+    }
+    .celestial { width: 70px; height: 70px; top: 6%; right: 6%; }
+    .timer {
+      width: min(94vw, 540px);
+      gap: 0.42rem;
+    }
+    .unit {
+      min-width: clamp(74px, 21vw, 120px);
+      padding: 0.68rem 0.55rem 0.62rem;
+      border-width: 2px;
+      border-radius: 10px;
+    }
+    .unit-num { font-size: clamp(1.7rem, 7.3vw, 3.2rem); }
+    .unit-lbl { margin-top: 0.35rem; }
+  }
+
   @media (max-width: 560px) {
-    .sep { display: none; }
-    .timer { gap: 0.35rem; }
-    .hero { width: 90px; height: 90px; }
-    .hero .eye { width: 16px; height: 16px; top: 22px; }
+    .hero { width: 88px; height: 88px; border-width: 3px; }
+    .hero .eye { width: 14px; height: 14px; top: 21px; }
     .hero .eye.left { left: 16px; }
     .hero .eye.right { right: 16px; }
-    .hero .nose { width: 18px; height: 26px; left: 36px; top: 38px; }
-    .hero .mouth { width: 12px; height: 20px; top: 50px; }
+    .hero .nose { width: 16px; height: 22px; left: 33px; top: 37px; }
+    .hero .mouth { width: 10px; height: 16px; top: 48px; }
     .hero .mouth.left { left: 24px; }
     .hero .mouth.right { right: 24px; }
+    .timer {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: min(96vw, 360px);
+      gap: 0.5rem;
+    }
+    .unit {
+      min-width: 0;
+      width: 100%;
+      padding: 0.78rem 0.55rem 0.72rem;
+      border-radius: 12px;
+      box-shadow:
+        inset 0 3px 0 rgba(196, 208, 228, 0.4),
+        inset 0 -4px 0 rgba(41, 48, 62, 0.75),
+        0 10px 16px rgba(0, 0, 0, 0.34),
+        0 0 0 1px rgba(214, 227, 248, 0.14);
+    }
+    .unit-num {
+      font-size: clamp(1.9rem, 10vw, 2.55rem);
+      letter-spacing: 0.02em;
+    }
+    .unit-lbl {
+      margin-top: 0.42rem;
+      font-size: 0.46rem;
+      letter-spacing: 0.16em;
+    }
+    .tagline { font-size: 0.58rem; letter-spacing: 0.09em; }
+    .terrain, .decorations {
+      height: 27vh;
+      min-height: 162px;
+    }
   }
+
+  @media (max-width: 400px) {
+    .stage {
+      padding-inline: 0.55rem;
+      gap: 0.62rem;
+    }
+    .timer {
+      width: min(96vw, 332px);
+      gap: 0.42rem;
+    }
+    .unit { padding: 0.66rem 0.4rem 0.58rem; }
+    .unit-num { font-size: clamp(1.65rem, 10.8vw, 2.15rem); }
+    .unit-lbl { font-size: 0.41rem; letter-spacing: 0.1em; }
+  }
+
+  /* CLOUDS */
+  .clouds {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .cloud {
+    position: absolute;
+    left: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.2s;
+    animation: cloud-drift linear infinite;
+    filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.18));
+  }
+  body.day .cloud { opacity: 1; }
+  @keyframes cloud-drift {
+    from { transform: translateX(110vw); }
+    to   { transform: translateX(-320px); }
+  }
+  .cloud-px {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.86);
+    border: 2px solid rgba(180, 210, 240, 0.28);
+  }
+
+  /* TREES */
+  .tree { position: absolute; pointer-events: none; }
+  .tree-trunk {
+    position: absolute;
+    width: 16px; height: 16px;
+    background: linear-gradient(180deg, #8a5627 0%, #643d1c 100%);
+    border: 1px solid #2f1708;
+    box-shadow: inset -3px 0 0 rgba(44, 24, 9, 0.85), inset 2px 0 0 rgba(177, 123, 66, 0.55);
+  }
+  .tree-trunk.core {
+    background: linear-gradient(180deg, #7a4b20 0%, #573214 100%);
+  }
+  .tree-trunk.root {
+    height: 10px;
+    background: linear-gradient(180deg, #6c431d 0%, #4d2a10 100%);
+  }
+  .tree-leaf {
+    position: absolute;
+    width: 16px; height: 16px;
+    background: linear-gradient(180deg, #46c746 0%, #2c9832 100%);
+    border: 1px solid #1a6b16;
+    box-shadow: inset 0 3px 0 rgba(124, 232, 112, 0.58), inset 0 -3px 0 rgba(18, 70, 19, 0.8);
+  }
+  .tree-leaf.mid {
+    background: linear-gradient(180deg, #39b93e 0%, #248a2c 100%);
+  }
+  .tree-leaf.deep {
+    background: linear-gradient(180deg, #2d8f31 0%, #1f6f22 100%);
+    box-shadow: inset 0 2px 0 rgba(87, 186, 83, 0.5), inset 0 -3px 0 rgba(12, 49, 14, 0.86);
+  }
+  .tree-leaf.tip {
+    background: linear-gradient(180deg, #69db69 0%, #43b844 100%);
+  }
+  .tree-leaf.top {
+    background: linear-gradient(180deg, #7be572 0%, #4bbb4b 100%);
+    box-shadow: inset 0 2px 0 rgba(194, 255, 170, 0.48), inset 0 -3px 0 rgba(24, 90, 24, 0.75);
+  }
+
+  /* ORE BLOCKS */
+  .block.gold-ore {
+    background: var(--stone);
+    box-shadow: inset 0 4px 0 var(--stone-top), inset 0 -4px 0 var(--stone-dark);
+  }
+  .block.gold-ore::after {
+    content: '';
+    position: absolute;
+    width: 4px; height: 4px;
+    top: 4px; left: 4px;
+    background: #f5c542;
+    box-shadow: 14px 2px 0 #f5c542, 4px 12px 0 #f5c542, 18px 18px 0 #f5c542;
+    pointer-events: none;
+  }
+  .block.diamond-ore {
+    background: var(--stone);
+    box-shadow: inset 0 4px 0 var(--stone-top), inset 0 -4px 0 var(--stone-dark);
+  }
+  .block.diamond-ore::after {
+    content: '';
+    position: absolute;
+    width: 4px; height: 4px;
+    top: 5px; left: 6px;
+    background: #31e8e8;
+    box-shadow: 14px 2px 0 #31e8e8, 6px 16px 0 #31e8e8;
+    pointer-events: none;
+  }
+
+  /* FIREFLIES */
+  .firefly {
+    position: fixed;
+    width: 4px; height: 4px;
+    background: #ccff55;
+    box-shadow: 0 0 6px 3px rgba(180, 255, 60, 0.7);
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.25s;
+  }
+  body.day .firefly { display: none; }
+
+  /* FLYERS (birds day / bats night) */
+  .flyer {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1;
+    width: 20px; height: 12px;
+    animation: flyer-cross linear infinite;
+  }
+  @keyframes flyer-cross {
+    from { transform: translateX(110vw); }
+    to   { transform: translateX(-60px); }
+  }
+  .flyer-px { position: absolute; }
+  .flyer-px.dark  { background: #1a1a2e; }
+  .flyer-px.light { background: #3a6090; }
+
+  /* FIREWORKS CANVAS */
+  #fireworks {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    display: none;
+  }
+
+  /* BIRTHDAY PULSE */
+  .bday.on .bday-title {
+    animation: bday-pulse 0.9s steps(1, end) infinite alternate;
+  }
+  @keyframes bday-pulse {
+    from { text-shadow: 3px 3px 0 #49390d; }
+    to   { text-shadow: 3px 3px 0 #49390d, 0 0 28px rgba(239, 196, 83, 0.75), 0 0 56px rgba(239, 196, 83, 0.3); }
+  }
+
+  /* TWINKLING STARS */
+  @keyframes star-twinkle {
+    0%, 100% { opacity: var(--op, 0.8); }
+    50%       { opacity: calc(var(--op, 0.8) * 0.1); }
+  }
+
+  /* FLOWERS */
+  .flower { position: absolute; pointer-events: none; }
+  .flower-stem  { position: absolute; left: 4px; bottom: 0; width: 4px; height: 10px; background: #3aaa2a; }
+  .flower-petal { position: absolute; width: 4px; height: 4px; }
+
 </style>
 </head>
 <body>
@@ -476,6 +771,7 @@
     <div class="stars" id="stars" aria-hidden="true"></div>
   </div>
 
+  <div class="clouds" id="clouds" aria-hidden="true"></div>
   <div class="terrain" id="terrain" aria-hidden="true"></div>
   <div class="decorations" id="decorations" aria-hidden="true"></div>
 
@@ -488,21 +784,13 @@
       <div class="mouth right"></div>
     </div>
 
-    <p class="tagline" id="tagline">The countdown until Ela's birthday!</p>
+    <p class="tagline" id="tagline">The countdown until Ela's birthday! - May 3</p>
 
     <div class="timer" id="timer" role="timer">
       <div class="unit"><span class="unit-num" id="days">00</span><span class="unit-lbl">Days</span></div>
-      <span class="sep">:</span>
       <div class="unit"><span class="unit-num" id="hours">00</span><span class="unit-lbl">Hours</span></div>
-      <span class="sep">:</span>
       <div class="unit"><span class="unit-num" id="mins">00</span><span class="unit-lbl">Minutes</span></div>
-      <span class="sep">:</span>
       <div class="unit"><span class="unit-num" id="secs">00</span><span class="unit-lbl">Seconds</span></div>
-    </div>
-
-    <div class="signpost" id="hint">
-      <div class="sign-board">May 3</div>
-      <div class="sign-stake"></div>
     </div>
 
     <div class="bday" id="bday">
@@ -517,13 +805,11 @@
 
   const timerEl   = document.getElementById('timer');
   const taglineEl = document.getElementById('tagline');
-  const hintEl    = document.getElementById('hint');
   const bdayEl    = document.getElementById('bday');
   const daysEl    = document.getElementById('days');
   const hoursEl   = document.getElementById('hours');
   const minsEl    = document.getElementById('mins');
   const secsEl    = document.getElementById('secs');
-
   let bdayShown = false;
 
   /* ---------- DAY / NIGHT (Israel local time) ---------- */
@@ -554,7 +840,9 @@
     c.innerHTML = '';
     const W = window.innerWidth;
     const H = window.innerHeight;
-    const count = Math.max(80, Math.floor(W / 14));
+    const count = _isMobile
+      ? Math.max(48, Math.floor(W / 22))
+      : Math.max(80, Math.floor(W / 14));
     const frag = document.createDocumentFragment();
     for (let i = 0; i < count; i++) {
       const s = document.createElement('span');
@@ -565,13 +853,305 @@
       s.style.height  = size + 'px';
       s.style.left    = Math.floor(Math.random() * W) + 'px';
       s.style.top     = Math.floor(Math.random() * H * 0.62) + 'px';
-      s.style.opacity = (0.55 + Math.random() * 0.4).toFixed(2);
+      const op = (0.55 + Math.random() * 0.4).toFixed(2);
+      s.style.setProperty('--op', op);
+      s.style.opacity = op;
+      if (Math.random() < 0.42) {
+        s.style.animation =
+          `star-twinkle ${(1.8 + Math.random() * 2.8).toFixed(1)}s steps(2,end) ` +
+          `${(-Math.random() * 3).toFixed(1)}s infinite`;
+      }
       frag.appendChild(s);
     }
     c.appendChild(frag);
   }
 
   /* ---------- TERRAIN + DECORATIONS ---------- */
+
+  function buildTree(container, x, bottomPx) {
+    const tree = document.createElement('div');
+    tree.className = 'tree';
+    tree.style.left   = x + 'px';
+    tree.style.bottom = bottomPx + 'px';
+    const B = 16;
+    const trunkLeft = 2 * B;
+
+    // Trunk: taller single-block oak trunk + roots
+    for (let row = 0; row < 4; row++) {
+      const t = document.createElement('span');
+      t.className = 'tree-trunk' + (row >= 1 && row <= 2 ? ' core' : '');
+      t.style.left   = trunkLeft + 'px';
+      t.style.bottom = (row * B) + 'px';
+      tree.appendChild(t);
+    }
+
+    const rootL = document.createElement('span');
+    rootL.className = 'tree-trunk root';
+    rootL.style.left = (trunkLeft - 5) + 'px';
+    rootL.style.bottom = '0px';
+    tree.appendChild(rootL);
+    const rootR = document.createElement('span');
+    rootR.className = 'tree-trunk root';
+    rootR.style.left = (trunkLeft + 5) + 'px';
+    rootR.style.bottom = '0px';
+    tree.appendChild(rootR);
+
+    // Canopy: compact stepped Minecraft-style oak crown
+    const leafBlocks = [
+      [0,2],[1,2],[2,2],[3,2],[4,2],
+      [0,3],[1,3],[2,3],[3,3],[4,3],
+      [1,4],[2,4],[3,4],
+      [1,5],[2,5],[3,5],
+      [2,6],
+    ];
+    leafBlocks.forEach(([col, row]) => {
+      const l = document.createElement('span');
+      const depthClass = row >= 6 ? ' top' : row >= 5 ? ' tip' : row >= 4 ? ' mid' : ' deep';
+      l.className = 'tree-leaf' + depthClass;
+      l.style.left   = (col * B) + 'px';
+      l.style.bottom = (row * B) + 'px';
+      tree.appendChild(l);
+    });
+
+    container.appendChild(tree);
+  }
+
+  /* ---------- CLOUDS ---------- */
+
+  function buildClouds() {
+    const c = document.getElementById('clouds');
+    c.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    // [left, top, w, h] in pixels for each cloud-block rect
+    const shapes = [
+      [[0,16,48,16],[16,0,32,16]],
+      [[0,16,80,16],[16,0,48,16]],
+      [[0,16,64,16],[16,0,48,16],[8,32,48,16]],
+      [[0,16,96,16],[16,0,64,16],[8,32,32,16]],
+      [[0,16,112,16],[16,0,80,16]],
+    ];
+    const cloudCount = _isMobile ? 4 : 7;
+    for (let i = 0; i < cloudCount; i++) {
+      const cloud = document.createElement('div');
+      cloud.className = 'cloud';
+      const speed = 55 + Math.random() * 90;
+      cloud.style.top              = (2 + Math.random() * 22) + '%';
+      cloud.style.animationDuration = speed + 's';
+      cloud.style.animationDelay   = -(Math.random() * speed) + 's';
+      const shape = shapes[Math.floor(Math.random() * shapes.length)];
+      shape.forEach(([l, t, w, h]) => {
+        const px = document.createElement('span');
+        px.className = 'cloud-px';
+        px.style.cssText = `left:${l}px;top:${t}px;width:${w}px;height:${h}px;`;
+        cloud.appendChild(px);
+      });
+      frag.appendChild(cloud);
+    }
+    c.appendChild(frag);
+  }
+
+  /* ---------- FIREFLIES ---------- */
+
+  const _flies = [];
+
+  function buildFireflies() {
+    _flies.forEach(f => { clearTimeout(f.tid); f.el.remove(); });
+    _flies.length = 0;
+    if (document.body.classList.contains('day')) return;
+    const W  = window.innerWidth;
+    const maxY = window.innerHeight * 0.60;
+    const flyCount = _isMobile ? 8 : 14;
+    for (let i = 0; i < flyCount; i++) {
+      const ff = document.createElement('div');
+      ff.className = 'firefly';
+      let x = Math.random() * W;
+      let y = 50 + Math.random() * (maxY - 50);
+      ff.style.cssText = `left:${x}px;top:${y}px;opacity:0;`;
+      document.body.appendChild(ff);
+      const entry = { el: ff, tid: 0 };
+      _flies.push(entry);
+      let vx = (Math.random() - 0.5) * 1.4;
+      let vy = (Math.random() - 0.5) * 0.9;
+      let lit = false, tick = 0;
+      const period = 7 + Math.floor(Math.random() * 11);
+      function drift() {
+        x += vx + (Math.random() - 0.5) * 0.9;
+        y += vy + (Math.random() - 0.5) * 0.6;
+        x = (x + W) % W;
+        y = Math.max(50, Math.min(maxY, y));
+        if (++tick >= period) { lit = !lit; tick = 0; }
+        ff.style.left    = x + 'px';
+        ff.style.top     = y + 'px';
+        ff.style.opacity = lit ? '1' : '0';
+        entry.tid = setTimeout(drift, 85 + Math.random() * 55);
+      }
+      entry.tid = setTimeout(drift, i * 180 + Math.random() * 900);
+    }
+  }
+
+  /* ---------- FLYERS (birds / bats) ---------- */
+
+  const _flyers = [];
+  let _shootTimer    = null;
+  const _isMobile    = window.matchMedia('(max-width: 700px)').matches;
+
+  function buildFlyers() {
+    _flyers.forEach(f => f.remove());
+    _flyers.length = 0;
+    const isDay = document.body.classList.contains('day');
+    const flyerCount = _isMobile ? 2 : 4;
+    for (let i = 0; i < flyerCount; i++) {
+      const fl = document.createElement('div');
+      fl.className = 'flyer';
+      fl.style.top = (5 + Math.random() * 26) + '%';
+      const dur = 13 + Math.random() * 20;
+      fl.style.animationDuration = dur + 's';
+      fl.style.animationDelay   = -(Math.random() * dur) + 's';
+      if (isDay) {
+        // V-wing bird (two short strokes)
+        fl.innerHTML =
+          '<span class="flyer-px light" style="left:0;top:5px;width:8px;height:3px;border-radius:0;"></span>' +
+          '<span class="flyer-px light" style="left:10px;top:3px;width:8px;height:3px;"></span>';
+      } else {
+        // Bat: two wings + tiny body
+        fl.innerHTML =
+          '<span class="flyer-px dark" style="left:0;top:1px;width:5px;height:7px;"></span>' +
+          '<span class="flyer-px dark" style="left:6px;top:4px;width:8px;height:4px;"></span>' +
+          '<span class="flyer-px dark" style="left:15px;top:1px;width:5px;height:7px;"></span>';
+      }
+      document.body.appendChild(fl);
+      _flyers.push(fl);
+    }
+  }
+
+  /* ---------- FIREWORKS ---------- */
+
+  function launchFireworks() {
+    const canvas = document.getElementById('fireworks');
+    canvas.style.display = 'block';
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+    const PALETTE = [
+      '#efc453','#ff4444','#44ff88','#44aaff',
+      '#ff44dd','#ffaa33','#aaffaa','#ff8844',
+      '#44ffff','#ffffff','#ff6699','#99ff44',
+    ];
+    const rockets = [], particles = [];
+    let lastSpawn = 0;
+
+    function spawnRocket() {
+      rockets.push({
+        x: 80 + Math.random() * (canvas.width - 160),
+        y: canvas.height + 8,
+        vx: (Math.random() - 0.5) * 2.5,
+        vy: -(14 + Math.random() * 8),
+        color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+        trail: [],
+      });
+    }
+
+    function explode(x, y, color) {
+      const n = 30 + Math.floor(Math.random() * 18);
+      for (let i = 0; i < n; i++) {
+        const angle = (i / n) * Math.PI * 2 + Math.random() * 0.25;
+        const spd   = 1.5 + Math.random() * 5;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd - 1,
+          color,
+          alt: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+          life: 1,
+          decay: 0.010 + Math.random() * 0.015,
+          size: 4,
+        });
+      }
+      // White sparkle burst
+      for (let i = 0; i < 8; i++) {
+        particles.push({
+          x: x + (Math.random() - 0.5) * 18,
+          y: y + (Math.random() - 0.5) * 18,
+          vx: (Math.random() - 0.5) * 1.2,
+          vy: (Math.random() - 0.5) * 1.2,
+          color: '#ffffff', alt: '#ffffff',
+          life: 1, decay: 0.032, size: 2,
+        });
+      }
+    }
+
+    function frame(ts) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (ts - lastSpawn > 550 + Math.random() * 650) {
+        spawnRocket();
+        if (Math.random() < 0.35) spawnRocket();
+        lastSpawn = ts;
+      }
+      for (let i = rockets.length - 1; i >= 0; i--) {
+        const r = rockets[i];
+        r.trail.push({ x: r.x, y: r.y });
+        if (r.trail.length > 8) r.trail.shift();
+        r.x += r.vx; r.y += r.vy; r.vy += 0.22;
+        for (let t = 0; t < r.trail.length; t++) {
+          ctx.globalAlpha = (t + 1) / r.trail.length * 0.65;
+          ctx.fillStyle = r.color;
+          const sz = Math.max(1, Math.round(3 * (t + 1) / r.trail.length));
+          ctx.fillRect(Math.round(r.trail[t].x) - sz, Math.round(r.trail[t].y) - sz, sz * 2, sz * 2);
+        }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = r.color;
+        ctx.fillRect(Math.round(r.x) - 3, Math.round(r.y) - 3, 6, 6);
+        if (r.vy >= -0.5) { explode(r.x, r.y, r.color); rockets.splice(i, 1); }
+      }
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.07; p.vx *= 0.97;
+        p.life -= p.decay;
+        if (p.life <= 0) { particles.splice(i, 1); continue; }
+        ctx.globalAlpha = Math.min(1, p.life * 1.4);
+        ctx.fillStyle = p.life > 0.5 ? p.color : p.alt;
+        const sz = Math.max(2, Math.round(p.size * p.life * 0.85 + 1));
+        ctx.fillRect(Math.round(p.x) - sz / 2, Math.round(p.y) - sz / 2, sz, sz);
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(frame);
+    }
+
+    spawnRocket();
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- SHOOTING STARS ---------- */
+
+  function triggerShootingStar() {
+    if (document.body.classList.contains('day')) return;
+    const starsEl = document.getElementById('stars');
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const x0  = 30 + Math.random() * (W * 0.6);
+    const y0  = 8  + Math.random() * (H * 0.22);
+    const dist = 140 + Math.random() * 110;
+    const rad  = (22 + Math.random() * 22) * Math.PI / 180;
+    const el = document.createElement('span');
+    el.style.cssText =
+      `position:absolute;width:6px;height:6px;background:#fff;` +
+      `left:${x0}px;top:${y0}px;opacity:1;pointer-events:none;` +
+      `transition:transform 0.65s linear,opacity 0.65s linear;` +
+      `box-shadow:8px 4px 0 rgba(255,255,255,0.5),16px 8px 0 rgba(255,255,255,0.22);`;
+    starsEl.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.transform = `translate(${Math.round(Math.cos(rad)*dist)}px,${Math.round(Math.sin(rad)*dist)}px)`;
+      el.style.opacity   = '0';
+    }));
+    setTimeout(() => el.remove(), 750);
+  }
+
+  function scheduleShootingStars() {
+    triggerShootingStar();
+    _shootTimer = setTimeout(scheduleShootingStars, 9000 + Math.random() * 16000);
+  }
+
   function buildScene() {
     const W = window.innerWidth;
     const t = document.getElementById('terrain');
@@ -618,7 +1198,12 @@
         block.className = 'block';
         if (y === totalHeight - 1) block.classList.add('grass');
         else if (y >= totalHeight - 3) block.classList.add('dirt');
-        else block.classList.add('stone');
+        else {
+          const r = Math.random();
+          if      (r < 0.04) block.classList.add('gold-ore');
+          else if (r < 0.07) block.classList.add('diamond-ore');
+          else               block.classList.add('stone');
+        }
         block.style.bottom = (y * 32) + 'px';
         col.appendChild(block);
       }
@@ -655,6 +1240,61 @@
       '<div class="bed-body"></div>' +
       '<div class="bed-foot"></div>';
     d.appendChild(bed);
+
+    // Trees — keep at least one candidate even on very narrow screens
+    const treePositions = [];
+    const treeTarget = colCount < 10 ? 1 : (2 + (colCount > 20 ? 1 : 0));
+    const torchGap = colCount < 10 ? 2 : 4;
+    const treeGap = colCount < 10 ? 3 : 6;
+    const candidates = [];
+    for (let tc = 1; tc < colCount - 1; tc++) {
+      const nearTorch = Math.abs(tc - torchCol) < torchGap;
+      const nearBed = tc >= bedStart - 3 && tc <= bedEnd + 4;
+      if (!nearTorch && !nearBed) candidates.push(tc);
+    }
+
+    // Fallback for tiny viewports where strict filters remove all columns.
+    if (!candidates.length) {
+      for (let tc = 0; tc < colCount; tc++) {
+        if (Math.abs(tc - torchCol) >= 1) candidates.push(tc);
+      }
+    }
+
+    for (let i = candidates.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    }
+
+    for (let i = 0; i < candidates.length && treePositions.length < treeTarget; i++) {
+      const tc = candidates[i];
+      if (treePositions.some(p => Math.abs(p - tc) < treeGap)) continue;
+      treePositions.push(tc);
+      buildTree(d, tc * 32 - 16, heights[Math.max(0, Math.min(tc, heights.length - 1))] * 32);
+    }
+
+    // Pixel flowers scattered on grass
+    const PETAL_COLORS = ['#ff6b6b','#ffd700','#ff69b4','#87ceeb','#ff8c00','#da70d6'];
+    for (let i = 0; i < colCount; i++) {
+      if (i === torchCol || (i >= bedStart - 1 && i <= bedEnd + 3)) continue;
+      if (treePositions.some(tp => Math.abs(tp - i) < 2)) continue;
+      if (Math.random() < 0.18) {
+        const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
+        const f = document.createElement('div');
+        f.className = 'flower';
+        f.style.left   = (i * 32 + 6 + Math.floor(Math.random() * 18)) + 'px';
+        f.style.bottom = (heights[i] * 32) + 'px';
+        const stem = document.createElement('span');
+        stem.className = 'flower-stem';
+        f.appendChild(stem);
+        [[4,10],[4,16],[4,4],[0,10],[8,10]].forEach(([px, py]) => {
+          const p = document.createElement('span');
+          p.className = 'flower-petal';
+          p.style.cssText = `left:${px}px;bottom:${py}px;background:${color};`;
+          f.appendChild(p);
+        });
+        d.appendChild(f);
+      }
+    }
   }
 
   /* ---------- COUNTDOWN ---------- */
@@ -679,7 +1319,17 @@
   }
 
   function setNum(el, value) {
-    if (el.textContent !== value) el.textContent = value;
+    if (el.textContent === value) return;
+    el.textContent = value;
+    const unit = el.closest('.unit');
+    if (!unit) return;
+    unit.classList.remove('is-updating');
+    void unit.offsetWidth;
+    unit.classList.add('is-updating');
+    clearTimeout(unit._timerAnim);
+    unit._timerAnim = setTimeout(() => {
+      unit.classList.remove('is-updating');
+    }, 420);
   }
 
   function updateTimer() {
@@ -705,22 +1355,34 @@
     bdayShown = true;
     timerEl.style.display   = 'none';
     taglineEl.style.display = 'none';
-    hintEl.style.display    = 'none';
     bdayEl.classList.add('on');
+    launchFireworks();
   }
 
   /* ---------- BOOT ---------- */
+  let _resizeTid = null;
   window.addEventListener('resize', () => {
-    buildStars();
-    buildScene();
+    clearTimeout(_resizeTid);
+    _resizeTid = setTimeout(() => {
+      buildStars();
+      buildScene();
+      buildClouds();
+      buildFireflies();
+      buildFlyers();
+    }, 120);
   });
 
   applyTheme();
   buildStars();
   buildScene();
+  buildClouds();
+  buildFireflies();
+  buildFlyers();
+  scheduleShootingStars();
   updateTimer();
   setInterval(updateTimer, 1000);
 })();
 </script>
+<canvas id="fireworks" aria-hidden="true"></canvas>
 </body>
 </html>
