@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Countdown</title>
+<style>
+  :root {
+    /* night defaults */
+    --sky-top: #0b1430;
+    --sky-bottom: #101c3f;
+    --tagline-color: #9eefff;
+    --hint-color: #2a1a08;
+    --grass: #63b63f;
+    --grass-top: #86d666;
+    --grass-dark: #3f7f29;
+    --dirt: #6f4a2f;
+    --dirt-top: #8c6240;
+    --dirt-dark: #4a2f1e;
+    --stone: #6f7784;
+    --stone-top: #8f98a7;
+    --stone-dark: #4a515d;
+    --moon: #f0f4c4;
+    --moon-dark: #c8cca0;
+    --pixel-gold: #efc453;
+  }
+
+  body.day {
+    --sky-top: #74bff0;
+    --sky-bottom: #b8e0ff;
+    --tagline-color: #14365b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    background: var(--sky-top);
+    color: #fff;
+    font-family: "Monocraft", "Minecraft", "Press Start 2P", "Courier New", monospace;
+  }
+
+  body {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    -webkit-font-smoothing: none;
+  }
+
+  /* SKY LAYER */
+  .sky {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-bottom) 100%);
+  }
+
+  /* CELESTIAL BODIES */
+  .celestial {
+    position: absolute;
+    top: 9%;
+    right: 9%;
+    width: 88px;
+    height: 88px;
+  }
+
+  .moon {
+    background: var(--moon);
+    opacity: 0.92;
+    box-shadow: 0 0 0 4px rgba(240, 244, 196, 0.18);
+  }
+  .moon::before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 8px;
+    left: 26px;
+    background: var(--moon-dark);
+    box-shadow:
+      -16px 20px 0 0 var(--moon-dark),
+      14px 24px 0 0 var(--moon-dark),
+      28px 10px 0 0 var(--moon-dark),
+      -4px 42px 0 0 var(--moon-dark),
+      36px 48px 0 0 var(--moon-dark);
+  }
+
+  .sun {
+    display: none;
+    background: #ffe04a;
+    box-shadow:
+      0 0 0 4px rgba(255, 224, 74, 0.25),
+      0 0 36px 10px rgba(255, 224, 74, 0.45);
+  }
+  .sun::before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 14px;
+    left: 22px;
+    background: #ffae3a;
+    box-shadow:
+      16px 8px 0 0 #ffae3a,
+      34px 22px 0 0 #ffae3a,
+      -2px 32px 0 0 #ffae3a,
+      48px 50px 0 0 #ffae3a,
+      8px 58px 0 0 #ffae3a;
+  }
+
+  body.day .moon  { display: none; }
+  body.day .sun   { display: block; }
+  body.day .stars { display: none; }
+
+  /* STARS — static */
+  .stars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .star {
+    position: absolute;
+    background: #ffffff;
+  }
+
+  /* TERRAIN */
+  .terrain {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 34vh;
+    min-height: 210px;
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .terrain-column {
+    position: absolute;
+    bottom: 0;
+    width: 32px;
+    height: 100%;
+  }
+  .block {
+    position: absolute;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    border: 2px solid rgba(0, 0, 0, 0.24);
+  }
+  .block.grass { background: var(--grass); box-shadow: inset 0 4px 0 var(--grass-top), inset 0 -4px 0 var(--grass-dark); }
+  .block.dirt  { background: var(--dirt);  box-shadow: inset 0 4px 0 var(--dirt-top),  inset 0 -4px 0 var(--dirt-dark);  }
+  .block.stone { background: var(--stone); box-shadow: inset 0 4px 0 var(--stone-top), inset 0 -4px 0 var(--stone-dark); }
+
+  /* DECORATIONS LAYER */
+  .decorations {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 34vh;
+    min-height: 210px;
+    z-index: 3;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  /* TORCH */
+  .torch {
+    position: absolute;
+    width: 12px;
+  }
+  .torch-stick {
+    position: absolute;
+    bottom: 0;
+    left: 2px;
+    width: 8px;
+    height: 22px;
+    background: #8a5a2b;
+    box-shadow: inset -2px 0 0 #5e3812, inset 2px 0 0 #a76c2b;
+    border: 1px solid #3a2410;
+  }
+  .torch-flame {
+    position: absolute;
+    bottom: 18px;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    background: #ffaa33;
+    box-shadow:
+      inset 0 -3px 0 #ff7700,
+      inset 0 3px 0 #ffeb3b,
+      0 0 24px 6px rgba(255, 170, 51, 0.55),
+      0 0 56px 14px rgba(255, 170, 51, 0.22);
+    animation: torch-flicker 0.5s steps(2, end) infinite;
+  }
+  @keyframes torch-flicker {
+    0%, 100% {
+      box-shadow:
+        inset 0 -3px 0 #ff7700,
+        inset 0 3px 0 #ffeb3b,
+        0 0 24px 6px rgba(255, 170, 51, 0.55),
+        0 0 56px 14px rgba(255, 170, 51, 0.22);
+    }
+    50% {
+      box-shadow:
+        inset 0 -3px 0 #ff7700,
+        inset 0 3px 0 #ffeb3b,
+        0 0 18px 4px rgba(255, 170, 51, 0.42),
+        0 0 40px 10px rgba(255, 170, 51, 0.14);
+    }
+  }
+  body.day .torch-flame {
+    animation: torch-flicker-day 0.5s steps(2, end) infinite;
+  }
+  @keyframes torch-flicker-day {
+    0%, 100% {
+      box-shadow:
+        inset 0 -3px 0 #ff7700,
+        inset 0 3px 0 #ffeb3b,
+        0 0 10px 2px rgba(255, 170, 51, 0.4);
+    }
+    50% {
+      box-shadow:
+        inset 0 -3px 0 #ff7700,
+        inset 0 3px 0 #ffeb3b,
+        0 0 8px 1px rgba(255, 170, 51, 0.3);
+    }
+  }
+
+  /* BED + STEVE */
+  .bed {
+    position: absolute;
+    width: 96px;
+    height: 32px;
+  }
+  .bed-pillow {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 26px;
+    background: #f0e8d0;
+    border: 3px solid #5b1414;
+    box-shadow: inset 0 4px 0 #ffffff, inset 0 -4px 0 #c8b890;
+  }
+  .bed-body {
+    position: absolute;
+    bottom: 0;
+    left: 30px;
+    width: 66px;
+    height: 22px;
+    background: #d23838;
+    border: 3px solid #5b1414;
+    border-left: none;
+    box-shadow: inset 0 4px 0 #ee5454, inset 0 -4px 0 #a82626;
+  }
+  .bed-foot {
+    position: absolute;
+    bottom: 0;
+    right: 3px;
+    width: 6px;
+    height: 8px;
+    background: #5b1414;
+  }
+  .steve {
+    position: absolute;
+    bottom: 24px;
+    left: 1px;
+    width: 28px;
+    height: 28px;
+    background: #d6a380;
+    border: 2px solid #1a1208;
+    box-shadow: 0 3px 0 #1a1208;
+  }
+  .steve-hair-top { position: absolute; top: 0;    left: 0;  width: 24px; height: 5px;  background: #3e2812; }
+  .steve-hair-l   { position: absolute; top: 0;    left: 0;  width: 4px;  height: 16px; background: #3e2812; }
+  .steve-hair-r   { position: absolute; top: 0;    right: 0; width: 4px;  height: 16px; background: #3e2812; }
+  .steve-eye      { position: absolute; top: 11px; width: 5px; height: 2px; background: #1a1208; }
+  .steve-eye.left  { left: 5px; }
+  .steve-eye.right { right: 5px; }
+  .steve-mouth    { position: absolute; top: 18px; left: 9px; width: 6px; height: 2px; background: #6b3a1a; }
+
+  .zzz {
+    position: absolute;
+    color: #ffffff;
+    font-weight: 700;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+  }
+  body.day .zzz { color: #1a3550; text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.5); }
+  .zzz.z1 { bottom: 58px; left: 32px; font-size: 12px; opacity: 0.6; }
+  .zzz.z2 { bottom: 74px; left: 44px; font-size: 16px; opacity: 0.8; }
+  .zzz.z3 { bottom: 92px; left: 58px; font-size: 20px; }
+
+  /* CONTENT STAGE */
+  .stage {
+    position: relative;
+    z-index: 5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 4vw, 3rem);
+    text-align: center;
+    gap: clamp(0.8rem, 2.4vw, 1.6rem);
+  }
+
+  /* HERO CREEPER FACE */
+  .hero {
+    position: relative;
+    width: 106px;
+    height: 106px;
+    background: #65bf45;
+    border: 4px solid #2f6a22;
+    box-shadow: 0 6px 0 #1f3e18;
+    flex-shrink: 0;
+  }
+  .hero .eye, .hero .nose, .hero .mouth { position: absolute; background: #182a14; }
+  .hero .eye { width: 18px; height: 18px; top: 26px; }
+  .hero .eye.left { left: 20px; }
+  .hero .eye.right { right: 20px; }
+  .hero .nose { width: 20px; height: 30px; left: 43px; top: 44px; }
+  .hero .mouth { width: 14px; height: 24px; top: 58px; }
+  .hero .mouth.left { left: 30px; }
+  .hero .mouth.right { right: 30px; }
+
+  /* TAGLINE */
+  .tagline {
+    color: var(--tagline-color);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: clamp(0.62rem, 1.9vw, 0.86rem);
+    text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55);
+  }
+  body.day .tagline { text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.5); }
+
+  /* TIMER */
+  .timer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: clamp(0.35rem, 1.6vw, 1rem);
+    margin: clamp(0.4rem, 1.2vw, 0.8rem) 0;
+  }
+  .unit {
+    position: relative;
+    min-width: clamp(78px, 14vw, 144px);
+    padding: clamp(0.7rem, 2vw, 1.2rem) clamp(0.7rem, 2.3vw, 1.2rem);
+    background: #6c7481;
+    border: 4px solid #3f4550;
+    box-shadow:
+      inset 0 4px 0 #8f98a7,
+      inset 0 -4px 0 #343b45,
+      0 6px 0 #222831;
+    overflow: hidden;
+  }
+  .unit::before {
+    content: '';
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    top: 14px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0.65;
+    box-shadow:
+      18px 6px 0 0 rgba(0, 0, 0, 0.35),
+      32px 22px 0 0 rgba(255, 255, 255, 0.18),
+      8px 38px 0 0 rgba(0, 0, 0, 0.35),
+      48px 12px 0 0 rgba(255, 255, 255, 0.12),
+      62px 30px 0 0 rgba(0, 0, 0, 0.35),
+      24px 50px 0 0 rgba(255, 255, 255, 0.16),
+      54px 46px 0 0 rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+  }
+  .unit-num {
+    display: block;
+    font-size: clamp(2.2rem, 6vw, 5.4rem);
+    font-weight: 700;
+    line-height: 1;
+    color: #f7fbff;
+    text-shadow: 3px 3px 0 #1c2635;
+    font-variant-numeric: tabular-nums;
+  }
+  .unit-lbl {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: clamp(0.47rem, 1vw, 0.64rem);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #dff5ff;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.65);
+  }
+  .sep {
+    align-self: center;
+    color: var(--pixel-gold);
+    font-size: clamp(1.8rem, 4.5vw, 3.9rem);
+    line-height: 1;
+    text-shadow: 2px 2px 0 #372d10;
+  }
+
+  /* SIGNPOST */
+  .signpost {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .sign-board {
+    background: #b08043;
+    border: 3px solid #5b3a1a;
+    padding: 0.55rem 1.4rem 0.5rem;
+    color: #2a1a08;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: clamp(0.6rem, 1.5vw, 0.84rem);
+    text-shadow: 1px 1px 0 rgba(255, 240, 200, 0.45);
+    box-shadow:
+      inset 0 4px 0 #c89760,
+      inset 0 -4px 0 #875e2a,
+      0 4px 0 #4a2f10;
+    position: relative;
+  }
+  .sign-stake {
+    width: 8px;
+    height: 14px;
+    background: #5b3a1a;
+    box-shadow: inset -2px 0 0 #2a1a08, inset 2px 0 0 #875e2a;
+  }
+
+  /* BIRTHDAY STATE */
+  .bday { display: none; flex-direction: column; align-items: center; gap: 0.8rem; }
+  .bday.on { display: flex; }
+  .bday-title {
+    font-size: clamp(2rem, 8.2vw, 5.6rem);
+    color: var(--pixel-gold);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-shadow: 3px 3px 0 #49390d;
+    line-height: 1.05;
+  }
+  .bday-sub {
+    color: #97f4a5;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: clamp(0.7rem, 2vw, 1rem);
+    text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.65);
+  }
+  body.day .bday-sub { color: #1f5a2c; text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.5); }
+
+  /* RESPONSIVE */
+  @media (max-width: 560px) {
+    .sep { display: none; }
+    .timer { gap: 0.35rem; }
+    .hero { width: 90px; height: 90px; }
+    .hero .eye { width: 16px; height: 16px; top: 22px; }
+    .hero .eye.left { left: 16px; }
+    .hero .eye.right { right: 16px; }
+    .hero .nose { width: 18px; height: 26px; left: 36px; top: 38px; }
+    .hero .mouth { width: 12px; height: 20px; top: 50px; }
+    .hero .mouth.left { left: 24px; }
+    .hero .mouth.right { right: 24px; }
+  }
+</style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <div class="celestial moon" id="moon"></div>
+    <div class="celestial sun" id="sun"></div>
+    <div class="stars" id="stars" aria-hidden="true"></div>
+  </div>
+
+  <div class="terrain" id="terrain" aria-hidden="true"></div>
+  <div class="decorations" id="decorations" aria-hidden="true"></div>
+
+  <main class="stage">
+    <div class="hero" aria-hidden="true">
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+      <div class="nose"></div>
+      <div class="mouth left"></div>
+      <div class="mouth right"></div>
+    </div>
+
+    <p class="tagline" id="tagline">Crafting Birthday Magic</p>
+
+    <div class="timer" id="timer" role="timer">
+      <div class="unit"><span class="unit-num" id="days">00</span><span class="unit-lbl">Days</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="unit-num" id="hours">00</span><span class="unit-lbl">Hours</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="unit-num" id="mins">00</span><span class="unit-lbl">Minutes</span></div>
+      <span class="sep">:</span>
+      <div class="unit"><span class="unit-num" id="secs">00</span><span class="unit-lbl">Seconds</span></div>
+    </div>
+
+    <div class="signpost" id="hint">
+      <div class="sign-board">May 3</div>
+      <div class="sign-stake"></div>
+    </div>
+
+    <div class="bday" id="bday">
+      <h1 class="bday-title">Happy Birthday</h1>
+      <p class="bday-sub">Cake Time</p>
+    </div>
+  </main>
+
+<script>
+(() => {
+  'use strict';
+
+  const timerEl   = document.getElementById('timer');
+  const taglineEl = document.getElementById('tagline');
+  const hintEl    = document.getElementById('hint');
+  const bdayEl    = document.getElementById('bday');
+  const daysEl    = document.getElementById('days');
+  const hoursEl   = document.getElementById('hours');
+  const minsEl    = document.getElementById('mins');
+  const secsEl    = document.getElementById('secs');
+
+  let bdayShown = false;
+
+  /* ---------- DAY / NIGHT (Israel local time) ---------- */
+  function getIsraelHour() {
+    try {
+      const fmt = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jerusalem',
+        hour: '2-digit',
+        hour12: false,
+        hourCycle: 'h23'
+      });
+      return parseInt(fmt.format(new Date()), 10);
+    } catch (e) {
+      return new Date().getHours();
+    }
+  }
+
+  function applyTheme() {
+    const hour = getIsraelHour();
+    // Day window: 06:00 (inclusive) to 19:00 (exclusive)
+    const isDay = hour >= 6 && hour < 19;
+    document.body.classList.toggle('day', isDay);
+  }
+
+  /* ---------- STARS ---------- */
+  function buildStars() {
+    const c = document.getElementById('stars');
+    c.innerHTML = '';
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const count = Math.max(80, Math.floor(W / 14));
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('span');
+      s.className = 'star';
+      const big = Math.random() < 0.28;
+      const size = big ? 6 : 4;
+      s.style.width   = size + 'px';
+      s.style.height  = size + 'px';
+      s.style.left    = Math.floor(Math.random() * W) + 'px';
+      s.style.top     = Math.floor(Math.random() * H * 0.62) + 'px';
+      s.style.opacity = (0.55 + Math.random() * 0.4).toFixed(2);
+      frag.appendChild(s);
+    }
+    c.appendChild(frag);
+  }
+
+  /* ---------- TERRAIN + DECORATIONS ---------- */
+  function buildScene() {
+    const W = window.innerWidth;
+    const t = document.getElementById('terrain');
+    const d = document.getElementById('decorations');
+    t.innerHTML = '';
+    d.innerHTML = '';
+
+    const colCount = Math.ceil(W / 32) + 1;
+    const base = 3;
+
+    // Reserved columns: torch (single), bed (3 wide flat plateau)
+    const torchCol = Math.max(2, Math.floor(colCount * 0.18));
+    const bedStart = Math.max(torchCol + 4, Math.floor(colCount * 0.7));
+    const bedEnd   = bedStart + 3; // exclusive
+    const bedH     = 4;            // bed plateau height in blocks
+
+    const heights = new Array(colCount);
+    for (let i = 0; i < colCount; i++) {
+      let h;
+      if (i >= bedStart && i < bedEnd) {
+        h = bedH; // flat plateau under bed
+      } else if (i === bedEnd) {
+        h = bedH + 2; // rise into hillside
+      } else if (i === bedEnd + 1) {
+        h = bedH + 3; // taller hillside
+      } else if (i === bedEnd + 2) {
+        h = bedH + 2;
+      } else {
+        const variation = Math.floor(Math.sin(i * 0.42) * 1.4 + Math.random() * 2.4);
+        h = Math.max(3, base + variation);
+      }
+      heights[i] = h;
+    }
+
+    // Build columns
+    const tFrag = document.createDocumentFragment();
+    for (let i = 0; i < colCount; i++) {
+      const totalHeight = heights[i];
+      const col = document.createElement('div');
+      col.className = 'terrain-column';
+      col.style.left = (i * 32) + 'px';
+      for (let y = 0; y < totalHeight; y++) {
+        const block = document.createElement('span');
+        block.className = 'block';
+        if (y === totalHeight - 1) block.classList.add('grass');
+        else if (y >= totalHeight - 3) block.classList.add('dirt');
+        else block.classList.add('stone');
+        block.style.bottom = (y * 32) + 'px';
+        col.appendChild(block);
+      }
+      tFrag.appendChild(col);
+    }
+    t.appendChild(tFrag);
+
+    // Torch — sits on top of grass block, stake in middle of column
+    const torch = document.createElement('div');
+    torch.className = 'torch';
+    torch.style.left   = (torchCol * 32 + 10) + 'px';
+    torch.style.bottom = (heights[torchCol] * 32) + 'px';
+    torch.innerHTML = '<div class="torch-flame"></div><div class="torch-stick"></div>';
+    d.appendChild(torch);
+
+    // Bed with sleeping Steve — sits on the bed plateau, tucked against hillside
+    const bed = document.createElement('div');
+    bed.className = 'bed';
+    bed.style.left   = (bedStart * 32) + 'px';
+    bed.style.bottom = (bedH * 32) + 'px';
+    bed.innerHTML =
+      '<div class="zzz z1">Z</div>' +
+      '<div class="zzz z2">Z</div>' +
+      '<div class="zzz z3">Z</div>' +
+      '<div class="steve">' +
+        '<div class="steve-hair-top"></div>' +
+        '<div class="steve-hair-l"></div>' +
+        '<div class="steve-hair-r"></div>' +
+        '<div class="steve-eye left"></div>' +
+        '<div class="steve-eye right"></div>' +
+        '<div class="steve-mouth"></div>' +
+      '</div>' +
+      '<div class="bed-pillow"></div>' +
+      '<div class="bed-body"></div>' +
+      '<div class="bed-foot"></div>';
+    d.appendChild(bed);
+  }
+
+  /* ---------- COUNTDOWN ---------- */
+  function getTarget() {
+    const now = new Date();
+    let year = now.getFullYear();
+    let target = new Date(year, 4, 3, 0, 0, 0, 0);
+    if (now.getTime() > target.getTime()) {
+      target = new Date(year + 1, 4, 3, 0, 0, 0, 0);
+    }
+    return target;
+  }
+
+  function isBirthday() {
+    const now = new Date();
+    return now.getMonth() === 4 && now.getDate() === 3;
+  }
+
+  function pad(n) {
+    n = Math.max(0, Math.floor(n));
+    return n < 10 ? '0' + n : '' + n;
+  }
+
+  function setNum(el, value) {
+    if (el.textContent !== value) el.textContent = value;
+  }
+
+  function updateTimer() {
+    applyTheme();
+    if (isBirthday()) {
+      if (!bdayShown) showBirthday();
+      return;
+    }
+    const target = getTarget().getTime();
+    const now = Date.now();
+    let diff = Math.max(0, target - now);
+    const days  = Math.floor(diff / 86400000); diff -= days  * 86400000;
+    const hours = Math.floor(diff / 3600000);  diff -= hours * 3600000;
+    const mins  = Math.floor(diff / 60000);    diff -= mins  * 60000;
+    const secs  = Math.floor(diff / 1000);
+    setNum(daysEl,  pad(days));
+    setNum(hoursEl, pad(hours));
+    setNum(minsEl,  pad(mins));
+    setNum(secsEl,  pad(secs));
+  }
+
+  function showBirthday() {
+    bdayShown = true;
+    timerEl.style.display   = 'none';
+    taglineEl.style.display = 'none';
+    hintEl.style.display    = 'none';
+    bdayEl.classList.add('on');
+  }
+
+  /* ---------- BOOT ---------- */
+  window.addEventListener('resize', () => {
+    buildStars();
+    buildScene();
+  });
+
+  applyTheme();
+  buildStars();
+  buildScene();
+  updateTimer();
+  setInterval(updateTimer, 1000);
+})();
+</script>
+</body>
+</html>
